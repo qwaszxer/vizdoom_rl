@@ -13,65 +13,40 @@ import numpy as np
 import cv2
 import tensorflow as tf
 
+from env_vizdoom import EnvVizDoom
+
 def MakeDir(path):
     try:
         os.makedirs(path)
     except:
         pass
 
-lab = False
 load_model = False
 train = True
 test_display = True
 test_write_video = False
-path_work_dir = "~/rl_3d/"
-vizdoom_path = "~/ViZDoom/"
+path_work_dir = "/home/efim/vizdoom_rl/"
+vizdoom_path = "/home/efim/ViZDoom/"
 vizdoom_scenario = vizdoom_path + "scenarios/simpler_basic.wad"
 
-# Lab parameters.
-if (lab):
-    from env_lab import EnvLab
-
-    learning_rate = 0.00025  # 0.001
-    discount_factor = 0.99
-    step_num = int(5e5)  # int(1e6)
-    replay_memory_size = int(1e6)
-    replay_memory_batch_size = 64
-
-    # Exploration rate.
-    start_eps = 1.0
-    end_eps = 0.1
-    eps_decay_iter = 0.33 * step_num
-
-    frame_repeat = 10  # 4
-    channels = 3
-    resolution = (40, 40) + (channels,)  # Original: 240x320
-
-    model_path = path_work_dir + "model_lab_dqn/"
-    save_each = 0.01 * step_num
-    step_load = 100
-
 # Vizdoom parameters.
-if (not lab):
-    from env_vizdoom import EnvVizDoom
+learning_rate = 0.00025
+discount_factor = 0.99
+step_num = int(5e4)
+replay_memory_size = int(1e5)
+replay_memory_batch_size = 64
 
-    learning_rate = 0.00025
-    discount_factor = 0.99
-    step_num = int(5e4)
-    replay_memory_size = int(1e5)
-    replay_memory_batch_size = 64
+frame_repeat = 10
+channels = 3
+resolution = (40, 40) + (channels,) # Original: 480x640
 
-    frame_repeat = 10
-    channels = 3
-    resolution = (40, 40) + (channels,) # Original: 480x640
+start_eps = 1.0
+end_eps = 0.1
+eps_decay_iter = 0.33 * step_num
 
-    start_eps = 1.0
-    end_eps = 0.1
-    eps_decay_iter = 0.33 * step_num
-
-    model_path = path_work_dir + "model_vizdoom_dqn/"
-    save_each = 0.01 * step_num
-    step_load = 100
+model_path = path_work_dir + "model_vizdoom_dqn/"
+save_each = 0.01 * step_num
+step_load = 100
 
 MakeDir(model_path)
 model_name = model_path + "dqn"
@@ -141,7 +116,7 @@ class ReplayMemory(object):
 
     def Get(self, sample_size):
 
-        idx = random.sample(xrange(0, self.size-2), sample_size)
+        idx = random.sample(range(0, self.size - 2), sample_size)
         idx2 = []
         for i in idx:
             idx2.append(i + 1)
@@ -227,7 +202,7 @@ class Agent(object):
     def GetAction(self, state):
 
         if (random.random() <= 0.05):
-            a = random.randint(0, self.num_actions-1)
+            a = random.randint(0, self.num_actions - 1)
         else:
             a = self.model.GetAction(state)
 
@@ -244,7 +219,7 @@ class Agent(object):
             eps = end_eps
 
         if (random.random() <= eps):
-            a = random.randint(0, self.num_actions-1)
+            a = random.randint(0, self.num_actions - 1)
         else:
             a = self.model.GetAction(s)
 
@@ -261,7 +236,7 @@ class Agent(object):
         start_time = time.time()
         train_scores = []
         env.Reset()
-        for step in xrange(1, step_num+1):
+        for step in range(1, step_num + 1):
             self.Step(step)
             if (not env.IsRunning()):
                 train_scores.append(self.rewards)
@@ -300,7 +275,7 @@ def Test(agent):
         state = Preprocess(state_raw)
         action = agent.GetAction(state)
 
-        for _ in xrange(frame_repeat):
+        for _ in range(frame_repeat):
             # Display.
             if (test_display):
                 cv2.imshow("frame-test", state_raw)
@@ -326,10 +301,7 @@ if __name__ == '__main__':
     if (args.gpu):
         os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
-    if (lab):
-        env = EnvLab(80, 80, 60, "seekavoid_arena_01")
-    else:
-        env = EnvVizDoom(vizdoom_scenario)
+    env = EnvVizDoom(vizdoom_scenario)
 
     agent = Agent(env.NumActions())
 

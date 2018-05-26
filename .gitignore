@@ -1,0 +1,4 @@
+*.pyc
+*.ini
+*.avi
+model_vizdoom_*/

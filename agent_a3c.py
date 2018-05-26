@@ -10,29 +10,23 @@ import sys
 import time
 import os
 
+from env_vizdoom import EnvVizDoom
+
 def MakeDir(path):
     try:
         os.makedirs(path)
     except:
         pass
 
-lab = False
 load_model = False
 train = True
 test_display = True
 test_write_video = True
-path_work_dir = "~/rl_3d/"
-vizdoom_path = "~/ViZDoom/"
+path_work_dir = "/home/efim/rl_3d/"
+vizdoom_path = "/home/efim/ViZDoom/"
 vizdoom_scenario = vizdoom_path + "scenarios/simpler_basic.wad"
 
-if (lab):
-    from env_lab import EnvLab
-
-    model_path = path_work_dir + "model_lab_a3c/"
-else:
-    from env_vizdoom import EnvVizDoom
-
-    model_path = path_work_dir + "model_vizdoom_a3c/"
+model_path = path_work_dir + "model_vizdoom_a3c/"
 
 learning_rate = 0.00025
 device = "/cpu:0"
@@ -218,10 +212,7 @@ class Worker(object):
         self.local_ac = ACNet(num_actions, self.name, trainer)
         self.update_target_graph = self.update_target(global_scope_name, self.name)
 
-        if (lab):
-            self.env = EnvLab(80, 80, 60, "seekavoid_arena_01")
-        else:
-            self.env = EnvVizDoom(vizdoom_scenario)
+        self.env = EnvVizDoom(vizdoom_scenario)
 
     # Copies one set of variables to another.
     # Used to set worker network parameters to those of global network.
@@ -236,7 +227,7 @@ class Worker(object):
 
     # Calculate discounted returns.
     def Discount(self, x, gamma):
-        for idx in reversed(xrange(len(x) - 1)):
+        for idx in reversed(range(len(x) - 1)):
             x[idx] += x[idx + 1] * gamma
         return x
 
@@ -352,7 +343,7 @@ class Agent(object):
                 trainer = tf.train.RMSPropOptimizer(learning_rate)
 
                 workers = []
-                for i in xrange(num_workers):
+                for i in range(num_workers):
                     workers.append(Worker(i, env.NumActions(), trainer, model_name))
 
         saver = tf.train.Saver(max_to_keep=100)
@@ -401,7 +392,7 @@ def Test(agent):
         state = Preprocess(state_raw)
         action = agent.Act(state)
 
-        for _ in xrange(frame_repeat):
+        for _ in range(frame_repeat):
             if (test_display):
                 cv2.imshow("frame-test", state_raw)
                 cv2.waitKey(20)
@@ -419,10 +410,7 @@ def Test(agent):
 
 if __name__ == '__main__':
 
-    if (lab):
-        env = EnvLab(80, 80, 60, "seekavoid_arena_01")
-    else:
-        env = EnvVizDoom(vizdoom_scenario)
+    env = EnvVizDoom(vizdoom_scenario)
 
     agent = Agent()
 
