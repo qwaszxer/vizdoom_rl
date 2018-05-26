@@ -1,6 +1,6 @@
 ### ViZDoom reinforcement learning
 
-Implemented DQN [2] and A3C [3] algorithm for ViZDoom [1] basic scenario.
+Implemented DQN [2] and A3C [3] algorithms for ViZDoom [1] basic scenario.
 
 ### Dependencies
 

@@ -22,7 +22,7 @@ load_model = False
 train = True
 test_display = True
 test_write_video = True
-path_work_dir = "/home/efim/rl_3d/"
+path_work_dir = "/home/efim/vizdoom_rl/"
 vizdoom_path = "/home/efim/ViZDoom/"
 vizdoom_scenario = vizdoom_path + "scenarios/simpler_basic.wad"
 
